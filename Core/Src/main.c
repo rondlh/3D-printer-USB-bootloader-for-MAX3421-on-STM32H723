@@ -856,7 +856,7 @@ int main(void)
     tuh_task();
 
 	// Timeout counter
-	if (dontwait | (HAL_GetTick() > 3000)) // Usually takes 1150-2200ms
+	if (dontwait | (HAL_GetTick() > 2200)) // Usually takes 1150-2200ms
 	{
 		uart_printf("Time: %ums   Timeout...\r\n", HAL_GetTick());
 		set_magic_key(0); // IMPORTANT, KEEP HERE
