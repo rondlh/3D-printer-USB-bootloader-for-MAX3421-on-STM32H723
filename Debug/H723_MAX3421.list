@@ -7,19 +7,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         00010bdc  080002cc  080002cc  000012cc  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       000008dc  08010ea8  08010ea8  00011ea8  2**2
+  2 .rodata       000008b4  08010ea8  08010ea8  00011ea8  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM          00000008  08011784  08011784  00012784  2**2
+  3 .ARM          00000008  0801175c  0801175c  0001275c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  4 .init_array   00000004  0801178c  0801178c  0001278c  2**2
+  4 .init_array   00000004  08011764  08011764  00012764  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  5 .fini_array   00000004  08011790  08011790  00012790  2**2
+  5 .fini_array   00000004  08011768  08011768  00012768  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  6 .data         00000024  24000000  08011794  00013000  2**2
+  6 .data         00000024  24000000  0801176c  00013000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .bss          00001dfc  24000028  080117b8  00013028  2**3
+  7 .bss          00001dfc  24000028  08011790  00013028  2**3
                   ALLOC
-  8 ._user_heap_stack 00000604  24001e24  080117b8  00013e24  2**0
+  8 ._user_heap_stack 00000604  24001e24  08011790  00013e24  2**0
                   ALLOC
   9 .ARM.attributes 0000002e  00000000  00000000  00013024  2**0
                   CONTENTS, READONLY
@@ -2454,11 +2454,11 @@ int main(void)
     tuh_task();
 
 	// Timeout counter
-	if (dontwait | (HAL_GetTick() > 3000)) // Usually takes 1150-2200ms
+	if (dontwait | (HAL_GetTick() > 2200)) // Usually takes 1150-2200ms
  80013d0:	7cfc      	ldrb	r4, [r7, #19]
  80013d2:	f000 fdb1 	bl	8001f38 <HAL_GetTick>
  80013d6:	4603      	mov	r3, r0
- 80013d8:	f640 32b8 	movw	r2, #3000	@ 0xbb8
+ 80013d8:	f640 0298 	movw	r2, #2200	@ 0x898
  80013dc:	4293      	cmp	r3, r2
  80013de:	bf8c      	ite	hi
  80013e0:	2301      	movhi	r3, #1
@@ -2498,7 +2498,7 @@ int main(void)
  8001420:	f1b3 3fff 	cmp.w	r3, #4294967295
  8001424:	d01b      	beq.n	800145e <main+0x18a>
         {
-            uart_printf("Starting user application at: 0x0%x\r\n", FLASH_USER_START_ADDR);
+            uart_printf("Starting user application at 0x0%x\r\n", FLASH_USER_START_ADDR);
  8001426:	491e      	ldr	r1, [pc, #120]	@ (80014a0 <main+0x1cc>)
  8001428:	481e      	ldr	r0, [pc, #120]	@ (80014a4 <main+0x1d0>)
  800142a:	f7ff f93b 	bl	80006a4 <uart_printf>
@@ -2552,7 +2552,7 @@ int main(void)
  8001476:	bf00      	nop
  8001478:	e7f4      	b.n	8001464 <main+0x190>
  800147a:	bf00      	nop
- 800147c:	080112a4 	.word	0x080112a4
+ 800147c:	0801127c 	.word	0x0801127c
  8001480:	58004000 	.word	0x58004000
  8001484:	ba5eba11 	.word	0xba5eba11
  8001488:	08011224 	.word	0x08011224
@@ -2562,7 +2562,7 @@ int main(void)
  8001498:	08011260 	.word	0x08011260
  800149c:	08011028 	.word	0x08011028
  80014a0:	08020000 	.word	0x08020000
- 80014a4:	0801127c 	.word	0x0801127c
+ 80014a4:	080111d8 	.word	0x080111d8
  80014a8:	08011200 	.word	0x08011200
  80014ac:	58020000 	.word	0x58020000
 
@@ -4303,7 +4303,7 @@ LoopFillZerobss:
   ldr r1, =_edata
  8001db4:	24000024 	.word	0x24000024
   ldr r2, =_sidata
- 8001db8:	08011794 	.word	0x08011794
+ 8001db8:	0801176c 	.word	0x0801176c
   ldr r2, =_sbss
  8001dbc:	24000028 	.word	0x24000028
   ldr r4, =_ebss
@@ -4405,7 +4405,7 @@ HAL_StatusTypeDef HAL_Init(void)
  8001e2c:	46bd      	mov	sp, r7
  8001e2e:	bd80      	pop	{r7, pc}
  8001e30:	58024400 	.word	0x58024400
- 8001e34:	080112e0 	.word	0x080112e0
+ 8001e34:	080112b8 	.word	0x080112b8
  8001e38:	24000004 	.word	0x24000004
  8001e3c:	24000000 	.word	0x24000000
 
@@ -8954,7 +8954,7 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(const RCC_ClkInitTypeDef  *RCC_ClkInitStru
  8003720:	bd80      	pop	{r7, pc}
  8003722:	bf00      	nop
  8003724:	58024400 	.word	0x58024400
- 8003728:	080112e0 	.word	0x080112e0
+ 8003728:	080112b8 	.word	0x080112b8
  800372c:	24000004 	.word	0x24000004
  8003730:	24000000 	.word	0x24000000
  8003734:	24000008 	.word	0x24000008
@@ -9356,7 +9356,7 @@ uint32_t HAL_RCC_GetHCLKFreq(void)
  8003a78:	46bd      	mov	sp, r7
  8003a7a:	bd80      	pop	{r7, pc}
  8003a7c:	58024400 	.word	0x58024400
- 8003a80:	080112e0 	.word	0x080112e0
+ 8003a80:	080112b8 	.word	0x080112b8
  8003a84:	24000004 	.word	0x24000004
  8003a88:	24000000 	.word	0x24000000
 
@@ -9390,7 +9390,7 @@ uint32_t HAL_RCC_GetPCLK1Freq(void)
  8003aac:	4618      	mov	r0, r3
  8003aae:	bd80      	pop	{r7, pc}
  8003ab0:	58024400 	.word	0x58024400
- 8003ab4:	080112e0 	.word	0x080112e0
+ 8003ab4:	080112b8 	.word	0x080112b8
 
 08003ab8 <HAL_RCC_GetPCLK2Freq>:
   * @note   Each time PCLK2 changes, this function must be called to update the
@@ -9421,7 +9421,7 @@ uint32_t HAL_RCC_GetPCLK2Freq(void)
  8003ad8:	4618      	mov	r0, r3
  8003ada:	bd80      	pop	{r7, pc}
  8003adc:	58024400 	.word	0x58024400
- 8003ae0:	080112e0 	.word	0x080112e0
+ 8003ae0:	080112b8 	.word	0x080112b8
 
 08003ae4 <HAL_RCC_GetClockConfig>:
   * will be configured.
@@ -12421,7 +12421,7 @@ uint32_t HAL_RCCEx_GetD3PCLK1Freq(void)
  8004ec8:	4618      	mov	r0, r3
  8004eca:	bd80      	pop	{r7, pc}
  8004ecc:	58024400 	.word	0x58024400
- 8004ed0:	080112e0 	.word	0x080112e0
+ 8004ed0:	080112b8 	.word	0x080112b8
 
 08004ed4 <HAL_RCCEx_GetPLL2ClockFreq>:
   *         right PLL2CLK value. Otherwise, any configuration based on this function will be incorrect.
@@ -16195,7 +16195,7 @@ HAL_StatusTypeDef UART_SetConfig(UART_HandleTypeDef *huart)
  80069f0:	58000c00 	.word	0x58000c00
  80069f4:	03d09000 	.word	0x03d09000
  80069f8:	003d0900 	.word	0x003d0900
- 80069fc:	080112f0 	.word	0x080112f0
+ 80069fc:	080112c8 	.word	0x080112c8
       }
       else
       {
@@ -16577,7 +16577,7 @@ HAL_StatusTypeDef UART_SetConfig(UART_HandleTypeDef *huart)
         break;
  8006d0c:	e018      	b.n	8006d40 <UART_SetConfig+0xc58>
  8006d0e:	bf00      	nop
- 8006d10:	080112f0 	.word	0x080112f0
+ 8006d10:	080112c8 	.word	0x080112c8
  8006d14:	58024400 	.word	0x58024400
  8006d18:	03d09000 	.word	0x03d09000
  8006d1c:	003d0900 	.word	0x003d0900
@@ -16685,7 +16685,7 @@ HAL_StatusTypeDef UART_SetConfig(UART_HandleTypeDef *huart)
  8006db0:	e8bd 8fb0 	ldmia.w	sp!, {r4, r5, r7, r8, r9, sl, fp, pc}
  8006db4:	03d09000 	.word	0x03d09000
  8006db8:	003d0900 	.word	0x003d0900
- 8006dbc:	080112f0 	.word	0x080112f0
+ 8006dbc:	080112c8 	.word	0x080112c8
 
 08006dc0 <UART_AdvFeatureConfig>:
   * @brief Configure the UART peripheral advanced features.
@@ -17790,8 +17790,8 @@ static void UARTEx_SetNbDataToProcess(UART_HandleTypeDef *huart)
  80073f8:	f85d 7b04 	ldr.w	r7, [sp], #4
  80073fc:	4770      	bx	lr
  80073fe:	bf00      	nop
- 8007400:	08011308 	.word	0x08011308
- 8007404:	08011310 	.word	0x08011310
+ 8007400:	080112e0 	.word	0x080112e0
+ 8007404:	080112e8 	.word	0x080112e8
 
 08007408 <ld_16>:
 /*-----------------------------------------------------------------------*/
@@ -21517,7 +21517,7 @@ static int cmp_lfn (		/* 1:matched, 0:not matched */
  8008d9e:	46bd      	mov	sp, r7
  8008da0:	bd90      	pop	{r4, r7, pc}
  8008da2:	bf00      	nop
- 8008da4:	08011328 	.word	0x08011328
+ 8008da4:	08011300 	.word	0x08011300
 
 08008da8 <pick_lfn>:
 
@@ -21649,7 +21649,7 @@ static int pick_lfn (	/* 1:succeeded, 0:buffer overflow or invalid LFN entry */
  8008e6e:	46bd      	mov	sp, r7
  8008e70:	bd80      	pop	{r7, pc}
  8008e72:	bf00      	nop
- 8008e74:	08011328 	.word	0x08011328
+ 8008e74:	08011300 	.word	0x08011300
 
 08008e78 <put_lfn>:
 	const WCHAR* lfn,	/* Pointer to the LFN */
@@ -21773,7 +21773,7 @@ static int pick_lfn (	/* 1:succeeded, 0:buffer overflow or invalid LFN entry */
  8008f3e:	3720      	adds	r7, #32
  8008f40:	46bd      	mov	sp, r7
  8008f42:	bd80      	pop	{r7, pc}
- 8008f44:	08011328 	.word	0x08011328
+ 8008f44:	08011300 	.word	0x08011300
 
 08008f48 <gen_numname>:
 	BYTE* dst,			/* Pointer to the buffer to store numbered SFN */
@@ -24389,9 +24389,9 @@ static FRESULT create_name (	/* FR_OK: successful, FR_INVALID_NAME: could not cr
  800a066:	f043 0303 	orr.w	r3, r3, #3
  800a06a:	f887 3026 	strb.w	r3, [r7, #38]	@ 0x26
  800a06e:	e020      	b.n	800a0b2 <create_name+0x30a>
- 800a070:	080112a8 	.word	0x080112a8
- 800a074:	08011338 	.word	0x08011338
- 800a078:	080112b4 	.word	0x080112b4
+ 800a070:	08011280 	.word	0x08011280
+ 800a074:	08011310 	.word	0x08011310
+ 800a078:	0801128c 	.word	0x0801128c
 			} else {
 				if (IsUpper(wc)) {		/* ASCII upper case? */
  800a07c:	8cbb      	ldrh	r3, [r7, #36]	@ 0x24
@@ -24975,7 +24975,7 @@ static int test_gpt_header (	/* 0:Invalid, 1:Valid */
  800a3f2:	371c      	adds	r7, #28
  800a3f4:	46bd      	mov	sp, r7
  800a3f6:	bd90      	pop	{r4, r7, pc}
- 800a3f8:	080112bc 	.word	0x080112bc
+ 800a3f8:	08011294 	.word	0x08011294
 
 0800a3fc <check_fs>:
 
@@ -25173,8 +25173,8 @@ static UINT check_fs (	/* 0:FAT/FAT32 VBR, 1:exFAT VBR, 2:Not FAT and valid BS, 
  800a566:	3718      	adds	r7, #24
  800a568:	46bd      	mov	sp, r7
  800a56a:	bd80      	pop	{r7, pc}
- 800a56c:	080112c8 	.word	0x080112c8
- 800a570:	080112d4 	.word	0x080112d4
+ 800a56c:	080112a0 	.word	0x080112a0
+ 800a570:	080112ac 	.word	0x080112ac
 
 0800a574 <find_volume>:
 
@@ -25432,7 +25432,7 @@ static UINT find_volume (	/* Returns BS status found in the hosting drive */
  800a744:	46bd      	mov	sp, r7
  800a746:	e8bd 8fb0 	ldmia.w	sp!, {r4, r5, r7, r8, r9, sl, fp, pc}
  800a74a:	bf00      	nop
- 800a74c:	08011318 	.word	0x08011318
+ 800a74c:	080112f0 	.word	0x080112f0
 
 0800a750 <mount_volume>:
 static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
@@ -29308,7 +29308,7 @@ WCHAR ff_uni2oem (	/* Returns OEM code character, zero on error */
  800c6d8:	f85d 7b04 	ldr.w	r7, [sp], #4
  800c6dc:	4770      	bx	lr
  800c6de:	bf00      	nop
- 800c6e0:	080113b8 	.word	0x080113b8
+ 800c6e0:	08011390 	.word	0x08011390
 
 0800c6e4 <ff_oem2uni>:
 
@@ -29372,7 +29372,7 @@ WCHAR ff_oem2uni (	/* Returns Unicode character in UTF-16, zero on error */
  800c730:	f85d 7b04 	ldr.w	r7, [sp], #4
  800c734:	4770      	bx	lr
  800c736:	bf00      	nop
- 800c738:	080113b8 	.word	0x080113b8
+ 800c738:	08011390 	.word	0x08011390
  800c73c:	7fffff80 	.word	0x7fffff80
 
 0800c740 <ff_wtoupper>:
@@ -29544,8 +29544,8 @@ DWORD ff_wtoupper (	/* Returns up-converted code point */
  800c854:	f85d 7b04 	ldr.w	r7, [sp], #4
  800c858:	4770      	bx	lr
  800c85a:	bf00      	nop
- 800c85c:	080114b8 	.word	0x080114b8
- 800c860:	080116ac 	.word	0x080116ac
+ 800c85c:	08011490 	.word	0x08011490
+ 800c860:	08011684 	.word	0x08011684
 
 0800c864 <tuh_msc_get_block_count>:
 uint8_t tuh_msc_get_maxlun(uint8_t dev_addr) {
@@ -32047,7 +32047,7 @@ static inline usbh_class_driver_t const *get_driver(uint8_t drv_id) {
  800d886:	bf00      	nop
  800d888:	24001b74 	.word	0x24001b74
  800d88c:	24001b70 	.word	0x24001b70
- 800d890:	08011768 	.word	0x08011768
+ 800d890:	08011740 	.word	0x08011740
 
 0800d894 <tuh_speed_get>:
   *pid = dev->pid;
@@ -40322,10 +40322,10 @@ TU_ATTR_ALWAYS_INLINE static inline uint8_t tu_desc_len(void const* desc) {
  8010e5e:	4798      	blx	r3
  8010e60:	3601      	adds	r6, #1
  8010e62:	e7f2      	b.n	8010e4a <__libc_init_array+0x1e>
- 8010e64:	0801178c 	.word	0x0801178c
- 8010e68:	0801178c 	.word	0x0801178c
- 8010e6c:	0801178c 	.word	0x0801178c
- 8010e70:	08011790 	.word	0x08011790
+ 8010e64:	08011764 	.word	0x08011764
+ 8010e68:	08011764 	.word	0x08011764
+ 8010e6c:	08011764 	.word	0x08011764
+ 8010e70:	08011768 	.word	0x08011768
 
 08010e74 <memcpy>:
  8010e74:	440a      	add	r2, r1
