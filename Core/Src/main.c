@@ -80,7 +80,7 @@ CFG_TUH_MEM_SECTION static struct
 #define FLASH_USER_START_SECTOR	1U										// Bootloader in sector 0, start from sector 1
 #define FLASH_USER_START_ADDR	(FLASH_BASE + FLASH_BOOTLOADER_SIZE)	// Should start on a new sector boundary
 
-/* STM32 Bootloader addresses
+/* STM32 DFU bootloader addresses
    STM32C0   0x1FFF0000 | STM32F030x8 0x1FFFEC00 | STM32F030xC 0x1FFFD800 | STM32F03xx 0x1FFFEC00
    STM32F05  0x1FFFEC00 | STM32F07    0x1FFFC800 | STM32F09    0x1FFFD800 | STM32F10xx 0x1FFFF000
    STM32F105 0x1FFFB000 | STM32F107   0x1FFFB000 | STM32F10XL  0x1FFFE000 | STM32F2    0x1FFF0000
@@ -865,7 +865,7 @@ int main(void)
 
         if (*(__IO uint32_t*)FLASH_USER_START_ADDR != 0xFFFFFFFF) // Check if flash is empty
         {
-            uart_printf("Starting user application at: 0x0%x\r\n", FLASH_USER_START_ADDR);
+            uart_printf("Starting user application at 0x0%x\r\n", FLASH_USER_START_ADDR);
             HAL_Delay(25);
 
     		tuh_max3421_int_api(0, false);
