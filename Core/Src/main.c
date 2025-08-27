@@ -288,7 +288,7 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
   uint32_t compareFlashToFile(void)
   {
 	uint32_t i = 0, j;
-	uint32_t crc32 = ~CRC32_START; // Invert here, will be undone at crc32b
+	uint32_t file_crc32 = ~CRC32_START; // Invert here, will be undone in crc32b
 	int difference_found = 0;
 	int different = 0;
     unsigned int bytesRead;
@@ -297,7 +297,7 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
 	while ((i < fileSize) && !result)
 	{
 		result = f_read(&fwFile, appBuffer, FILE_BUFFER_SIZE, &bytesRead);
-		crc32 = crc32b(~crc32, appBuffer, bytesRead);
+		file_crc32 = crc32b(~file_crc32, appBuffer, bytesRead);
 		j = 0;
 		while ((j < bytesRead) && !result)
 		{
@@ -329,8 +329,7 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
 	else
 	{
 		uart_printf(" Equal \r\nFlash contents is the same, update is not required\r\n");
-		// Actual checksum is the inverse of the returned number
-		uart_printf("Flash CRC32: 0x%x\r\n", crc32);
+		uart_printf("Flash CRC32: 0x%x\r\n", file_crc32);
 	}
 
 	return different; // 0=equal, 1=different, 2=file read error
