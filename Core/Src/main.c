@@ -560,7 +560,7 @@ static bool inquiry_complete_cb(uint8_t dev_addr, tuh_msc_complete_data_t const 
   uint32_t freeFlash = (flashSize << 10) - FLASH_BOOTLOADER_SIZE;
   uart_printf("Free flash space: %dKB\r\n", freeFlash >> 10);
 
-  uart_printf("Firmware size: %dKB\r\n", fileSize >> 10);
+  uart_printf("Firmware file size: %dKB\r\n", fileSize >> 10);
 
   if (fileSize > freeFlash)
   {
