@@ -16,9 +16,9 @@
   ******************************************************************************
   */
 
-/**********************************************************************************************
-*  IRON 2025 smart USB bootloader for Mellow Fly D8 Pro (STM32H723) with MAX3421 at EXP2 port *
-**********************************************************************************************/
+/*********************************************************************************************
+* IRON 2025 smart USB bootloader for Mellow Fly D8 Pro (STM32H723) with MAX3421 at EXP2 port *
+*********************************************************************************************/
 
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -54,20 +54,21 @@ CFG_TUH_MEM_SECTION static struct
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 #define DEBUG_USART_HANDLE      huart1                                  // The UART to send debug info to
 #define SPI_HANDLE              hspi2                                   // SPI device for MAX3421 communication
 // NOTE: Select "LOW" for the SPI pins maximum frequency
 
 #define FAST_SPI                                                        // Use a faster/leaner SPI implementation
 
-#define VERBOSE_MODE													// Enable to send debug info to DEBUG_USART_HANDLE at 250K baud
+#define VERBOSE_MODE													// Comment out to disable sending info to USART (250K baud)
 #define COMPARE_BEFORE_FLASH											// Comment out to not compare the firmware file to the flash contents (faster)
 #define FIRMWARE_FILENAME		"firmware.bin"							// The firmware file to flash
 #define FIRMWARE_RENAME			"firmware.cur"							// Rename the firmware after flashing
 
 // Make sure pins don't interfere with SWD debug pins PA13 and PA14, disable when debugging
-#define PROGRESS_LED_PIN		GPIO_PIN_13								// Progress LED pin
-#define PROGRESS_LED_PORT		GPIOA									// Progress LED flashes during flash update
+#define PROGRESS_LED_PIN		GPIO_PIN_13								// Progress LED pin, flashes during flash update
+#define PROGRESS_LED_PORT		GPIOA									// Progress LED port
 
 #define DFU_ON_DOUBLE_RESET												// Double reset to start DFU mode, comment out to disable
 #define DFU_MAGIC_KEY			0xBA5EBA11								// Magic key to detect DFU mode
@@ -129,12 +130,12 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-  FATFS FatFs;                         // Only 1 device, 1 LUN
-  FIL fwFile;                          // File handle
-  FRESULT result;		               // File operation result
-  uint32_t fileSize;                   // Firmware file size in bytes
-  volatile bool _disk_busy = false;    // For FATFS
-  uint8_t appBuffer[FILE_BUFFER_SIZE]; // File read buffer
+FATFS FatFs;                          // FAT File System handle
+FIL fwFile;                           // File handle for the firmware file
+FRESULT result;		                  // File operation result
+uint32_t fileSize;                    // Firmware file size in bytes
+uint8_t fileBuffer[FILE_BUFFER_SIZE]; // File read buffer
+volatile bool _disk_busy = false;     // For FatFs
 
 /* USER CODE END PV */
 
@@ -167,108 +168,103 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
 
 #ifdef VERBOSE_MODE // No serial output if not in VERBOSE_MODE
 
-	enum flag_itoa
-	{
-	    FILL_ZERO = 1, BASE_8 = 4 + 2, BASE_10 = 8,
-	    BASE_16 = 8 + 4 + 2, PUT_PLUS = 16, PUT_MINUS = 32
-	};
-
+	// Lightweight printf, prints to uart (DEBUG_USART_HANDLE), no floats, no width control
 	void uart_printf(const char * fmt, ...)
 	{
 		va_list va;
-	    va_start(va, fmt);
-	    char debug_msg[255]; // Message buffer
-	    char * buf = debug_msg;
-	    char c;
-	    unsigned int num;
-	    while ((c = *(fmt++)))
-	    {
-	    	int width = 0;
-	    	if (c == '%')
-	        {
-	            int base = 2;
-	            int s_int = 0;
-	        MORE_FORMAT:
-	            c = *(fmt++); // Skip '%', check parameter
-	            switch (c)
-	            {
-	                case '0'...'9': // Width indicators
-	                  width = (width * 10) + c - '0';
-	                goto MORE_FORMAT;
+		va_start(va, fmt);
+		char debug_msg[255]; // Message buffer
+		char * buf = debug_msg;
+		char c;
+		unsigned int num;
+		while ((c = *(fmt++)))
+		{
+			int width = 0;
+			if (c == '%')
+			{
+				int base = 2;
+				int s_int = 0;
+			MORE_FORMAT:
+				c = *(fmt++); // Skip '%', check parameter
+				switch (c)
+				{
+					case '0'...'9': // Width indicators
+				  	width = (width * 10) + c - '0';
+					goto MORE_FORMAT;
 
-	                case '%': // "%%" prints "%"
-	                    *(buf++) = '%';
-	                break;
+					case '%': // "%%" prints "%"
+				 	   *(buf++) = '%';
+					break;
 
-	                case 'c': // Character
-	                    *(buf++) = va_arg(va, int);
-	                break;
+					case 'c': // Character
+				 	   *(buf++) = va_arg(va, int);
+					break;
 
-	                case 'd': // Signed integer, base 10
-	                case 'i': base = 10;
-	                    s_int = va_arg(va, int);
-	                    if (s_int < 0)
-	                       num = -s_int;
-	                    else
-	                      num = s_int;
-	                  goto ATOI;
-	                case 'x':      // Hexadecimal, base 16
-	                    base += 6; // 2 + 6 + 8 is base 16
-	                case 'u':      // Unsigned integer, base 10
-	        	        base += 8; // 2 + 8 is base 10
-	                case 'b':      // Binary, base 2
-	        	        num = va_arg(va, unsigned int);
-	                  ATOI:
-	                    char tmp[32]; // 32bit
-	                    char *q = tmp;
+					case 'd': // Signed integer, base 10
+					case 'i': base = 10;
+						s_int = va_arg(va, int);
+						if (s_int < 0)
+					   		num = -s_int;
+						else
+					  		num = s_int;
+				  	goto ATOI;
+					case 'x':	   // Hexadecimal, base 16
+						base += 6; // 2 + 6 + 8 is base 16
+					case 'u':	   // Unsigned integer, base 10
+						base += 8; // 2 + 8 is base 10
+					case 'b':	   // Binary, base 2
+						num = va_arg(va, unsigned int);
+				  	ATOI:
+						char tmp[32]; // 32bit
+						char *q = tmp;
 
-	                    do
-	                    {
-	                        int rem = '0' + (num % base);
-	                        if (rem > '9')
-	                          rem += 7; // Map to 'ABCDEF'
-	                        *(q++) = rem;
-	                    } while ((num /= base));
+						do
+						{
+							int rem = '0' + (num % base);
+							if (rem > '9')
+						  		rem += 7; // Map to 'ABCDEF'
+					   		*(q++) = rem;
+						} while ((num /= base));
 
-	                    if (s_int < 0)
-	                      *(q++) = '-';
+						if (s_int < 0)
+					  		*(q++) = '-';
 
-	                    width -= q - tmp;
-	                    while (width-- > 0)
-	                      *(buf++) = ' ';
+						width -= q - tmp;
+						while (width-- > 0)
+					  		*(buf++) = ' ';
 
-	                    while (tmp < q) // Reverse data order, "123" --> "321"
-	                      *(buf++) = *(--q);
-	                break;
+				   		while (tmp < q) // Reverse data order, "123" --> "321"
+					   	*(buf++) = *(--q);
+					break;
 
-	                case 's': // String
-	                {
-	                    const char *p = va_arg(va, const char *);
-	                    while (*p)
-	                        *(buf++) = *(p++);
-	                }
-	            }
-	        }
-	        else
-	            *(buf++) = c; // Copy literal characters
-	    }
-	    *buf = '\0'; // Terminate string
+					case 's':  // String
+					{
+						const char *p = va_arg(va, const char *);
+						while (*p)
+							*(buf++) = *(p++);
+					}
+				}
+			}
+			else
+				*(buf++) = c; // Copy literal characters
+		}
+		*buf = '\0'; // Terminate string
 
-	    va_end(va);
+		va_end(va);
 
-	    HAL_UART_Transmit(&DEBUG_USART_HANDLE, (uint8_t *)debug_msg, buf - debug_msg, HAL_MAX_DELAY);
+		HAL_UART_Transmit(&DEBUG_USART_HANDLE, (uint8_t *)debug_msg, buf - debug_msg, HAL_MAX_DELAY);
 
-	    #ifdef PROGRESS_LED_PIN
-			HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN);
+		#ifdef PROGRESS_LED_PIN
+			HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN); // Flash LED
 		#endif
 	}
 
 #else
 
 	#ifdef PROGRESS_LED_PIN
-	    void uart_printf(const char * fmt, ...) { HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN); }
+		void uart_printf(const char * fmt, ...) { HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN); }
 	#else
-	    void uart_printf(const char * fmt, ...) { }
+		void uart_printf(const char * fmt, ...) { }
 	#endif
 
 #endif
@@ -284,9 +280,9 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
 
 #endif
 
-  // Return value: 0=equal, 1=different, 2=error
-  uint32_t compareFlashToFile(void)
-  {
+// Return value: 0=equal, 1=different, 2=error
+uint32_t compareFlashToFile(void)
+{
 	uint32_t i = 0, j;
 	uint32_t file_crc32 = ~CRC32_START; // Invert here, will be undone in crc32b
 	int difference_found = 0;
@@ -296,12 +292,12 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
 
 	while ((i < fileSize) && !result)
 	{
-		result = f_read(&fwFile, appBuffer, FILE_BUFFER_SIZE, &bytesRead);
-		file_crc32 = crc32b(~file_crc32, appBuffer, bytesRead);
+		result = f_read(&fwFile, fileBuffer, FILE_BUFFER_SIZE, &bytesRead);
+		file_crc32 = crc32b(~file_crc32, fileBuffer, bytesRead);
 		j = 0;
 		while ((j < bytesRead) && !result)
 		{
-			if (*(__IO char*)(FLASH_USER_START_ADDR + i + j) != appBuffer[j])
+			if (*(__IO char*)(FLASH_USER_START_ADDR + i + j) != fileBuffer[j])
 				difference_found = 1;
 			j++;
 		}
@@ -320,25 +316,25 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
 
 	if (result)
 	{
-	    uart_printf(" Error\r\nFile read error: %d\r\n", result);
+		uart_printf(" Error\r\nFile read error: %d\r\n", result);
 		return 2;
 	}
 	else
 	if (different)
-		uart_printf("* Different\r\nFlash contents differs, update is required\r\n");
+		uart_printf(" Different\r\nFlash contents differs, update is required\r\n");
 	else
 	{
-		uart_printf(" Equal \r\nFlash contents is the same, update is not required\r\n");
+		uart_printf(" Equal\r\nFlash contents is the same, update is not required\r\n");
 		uart_printf("Flash CRC32: 0x%x\r\n", file_crc32);
 	}
 
 	return different; // 0=equal, 1=different, 2=file read error
-  }
+}
 
-  // Return value: 0=OK, 1=failed/error
-  int CopyFileToFlashMemory(void)
-  {
-    // STM32H7xx FLASH SECTORS 0-7 all are 128 KBytes (FLASH_SECTOR_SIZE)
+// Return value: 0=OK, 1=failed/error
+int CopyFileToFlashMemory(void)
+{
+	// STM32H7xx FLASH SECTORS 0-7 all are 128 KBytes (FLASH_SECTOR_SIZE)
 
   	// Erase required sectors to fit the user application
   	uint32_t erasedSize = 0;
@@ -367,17 +363,17 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
   	while ((byteCounter < fileSize) && !result)
   	{
   		// f_read will always return a full buffer, except at the end of the file
-  		result = f_read(&fwFile, appBuffer, FILE_BUFFER_SIZE, &bytesRead);
-  		file_crc32 = crc32b(~file_crc32, appBuffer, bytesRead);
+  		result = f_read(&fwFile, fileBuffer, FILE_BUFFER_SIZE, &bytesRead);
+  		file_crc32 = crc32b(~file_crc32, fileBuffer, bytesRead);
 
   		if (bytesRead < FILE_BUFFER_SIZE) // Add some "erased flash" bytes to the buffer at the end of the file
-  			memset(appBuffer + bytesRead, 0xFF, (FILE_BUFFER_SIZE - bytesRead) % FLASHWORD);
+  			memset(fileBuffer + bytesRead, 0xFF, (FILE_BUFFER_SIZE - bytesRead) % FLASHWORD);
 
   		// Write FLASHWORDs to flash memory
   		i = 0;
   		while ((i < bytesRead) && !result)
   		{
-  			result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, FLASH_USER_START_ADDR + byteCounter + i, (volatile uint32_t)(appBuffer + i));
+  			result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, FLASH_USER_START_ADDR + byteCounter + i, (volatile uint32_t)(fileBuffer + i));
   			i += FLASHWORD;
   		}
   		byteCounter += bytesRead;
@@ -404,7 +400,7 @@ uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
   	  uart_printf(" Failed: %d\r\n", result);
 
   	return result;
-  }
+}
 
 // -----------------------------------------------------------------
 // TinyUSB SPI API for MAX3421 USB 2.0 HOST
@@ -742,7 +738,6 @@ DRESULT disk_ioctl (
 
   return RES_OK;
 }
-
 
 /* USER CODE END 0 */
 
