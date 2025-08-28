@@ -5,13 +5,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../TinyUSB/class/midi/midi_device.c 
+../TinyUSB/class/midi/midi_device.c \
+../TinyUSB/class/midi/midi_host.c 
 
 OBJS += \
-./TinyUSB/class/midi/midi_device.o 
+./TinyUSB/class/midi/midi_device.o \
+./TinyUSB/class/midi/midi_host.o 
 
 C_DEPS += \
-./TinyUSB/class/midi/midi_device.d 
+./TinyUSB/class/midi/midi_device.d \
+./TinyUSB/class/midi/midi_host.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -21,7 +24,7 @@ TinyUSB/class/midi/%.o TinyUSB/class/midi/%.su TinyUSB/class/midi/%.cyclo: ../Ti
 clean: clean-TinyUSB-2f-class-2f-midi
 
 clean-TinyUSB-2f-class-2f-midi:
-	-$(RM) ./TinyUSB/class/midi/midi_device.cyclo ./TinyUSB/class/midi/midi_device.d ./TinyUSB/class/midi/midi_device.o ./TinyUSB/class/midi/midi_device.su
+	-$(RM) ./TinyUSB/class/midi/midi_device.cyclo ./TinyUSB/class/midi/midi_device.d ./TinyUSB/class/midi/midi_device.o ./TinyUSB/class/midi/midi_device.su ./TinyUSB/class/midi/midi_host.cyclo ./TinyUSB/class/midi/midi_host.d ./TinyUSB/class/midi/midi_host.o ./TinyUSB/class/midi/midi_host.su
 
 .PHONY: clean-TinyUSB-2f-class-2f-midi
 

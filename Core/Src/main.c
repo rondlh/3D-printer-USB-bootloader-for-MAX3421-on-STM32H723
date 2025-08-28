@@ -477,7 +477,7 @@ void HAL_SPI_TransmitReceive_fast(const uint8_t *pTxData, uint8_t *pRxData, uint
 
 // TinyUSB API to transfer data with MAX3421 SPI
 // Either tx_buf or rx_buf can be NULL, which means transfer is write or read only
-bool tuh_max3421_spi_xfer_api(uint8_t rhport, uint8_t * tx_buf, uint8_t* rx_buf, size_t xfer_bytes)
+bool tuh_max3421_spi_xfer_api(uint8_t rhport, uint8_t const * tx_buf, uint8_t* rx_buf, size_t xfer_bytes)
 {
   (void) rhport; // Unused
 

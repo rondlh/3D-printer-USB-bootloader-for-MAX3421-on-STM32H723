@@ -20,8 +20,8 @@
 ../TinyUSB/common/tusb_fifo.c:861:10:tu_fifo_write_n	2
 ../TinyUSB/common/tusb_fifo.c:882:10:tu_fifo_write_n_const_addr_full_words	2
 ../TinyUSB/common/tusb_fifo.c:896:6:tu_fifo_clear	1
-../TinyUSB/common/tusb_fifo.c:919:6:tu_fifo_set_overwritable	1
-../TinyUSB/common/tusb_fifo.c:948:6:tu_fifo_advance_write_pointer	1
-../TinyUSB/common/tusb_fifo.c:969:6:tu_fifo_advance_read_pointer	1
-../TinyUSB/common/tusb_fifo.c:989:6:tu_fifo_get_read_info	8
-../TinyUSB/common/tusb_fifo.c:1057:6:tu_fifo_get_write_info	6
+../TinyUSB/common/tusb_fifo.c:919:6:tu_fifo_set_overwritable	2
+../TinyUSB/common/tusb_fifo.c:951:6:tu_fifo_advance_write_pointer	1
+../TinyUSB/common/tusb_fifo.c:972:6:tu_fifo_advance_read_pointer	1
+../TinyUSB/common/tusb_fifo.c:992:6:tu_fifo_get_read_info	8
+../TinyUSB/common/tusb_fifo.c:1060:6:tu_fifo_get_write_info	6
