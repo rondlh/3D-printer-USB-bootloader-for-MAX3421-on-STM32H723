@@ -34,3 +34,5 @@ An extra feature is that the bootloader can put the board into DFU mode by execu
 Flashing via USB is extremely fast, much faster than when using a SD card, but at start up you lose a bit of time (especially when no USB flash key is present) because the system has to wait until the MAX3421 reports the flash drive and file system or that no drive is available.
 
 USB flash drive compatibility seems quite good, but some old (4GB) drives are not compatible. Most flash drives worked fine, including large drives, just format them in **FAT or exFAT** and write the **firmware.bin** file into it and eject the drive from the system safely. If it doesn't work then try another flash drive. The firmware file will be renamed to **firmware.cur** after a successful flash.
+
+After flashing the bootloader I like to make the boot sector read only with STM32CubeProgrammer, so I cannot accidentally overwrite the boot sector. Just uncheck the WRPS0 checkbox in the OB (Optional bytes) --> Write Protection tab and press Apply. This can always be undone later if needed.
