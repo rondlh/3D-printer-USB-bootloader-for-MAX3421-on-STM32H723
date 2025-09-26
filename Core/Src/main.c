@@ -55,31 +55,31 @@ CFG_TUH_MEM_SECTION static struct
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define DEBUG_USART_HANDLE      huart1                                  // The UART to send debug info to
-#define SPI_HANDLE              hspi2                                   // SPI device for MAX3421 communication
+#define DEBUG_USART_HANDLE       huart1                                 // The UART to send debug info to
+#define SPI_HANDLE               hspi2                                  // SPI device for MAX3421 communication
 // NOTE: Select "LOW" for the SPI pins maximum frequency
 
 #define FAST_SPI                                                        // Use a faster/leaner SPI implementation
 
 #define VERBOSE_MODE                                                    // Comment out to disable sending info to USART (250K baud)
 #define COMPARE_BEFORE_FLASH                                            // Comment out to not compare the firmware file to the flash contents (faster)
-#define FIRMWARE_FILENAME        "firmware.bin"                            // The firmware file to flash
-#define FIRMWARE_RENAME            "firmware.cur"                            // Rename the firmware after flashing
+#define FIRMWARE_FILENAME        "firmware.bin"                         // The firmware file to flash
+#define FIRMWARE_RENAME          "firmware.cur"                         // Rename the firmware after flashing
 
 // Make sure pins don't interfere with SWD debug pins PA13 and PA14, disable when debugging
-#define PROGRESS_LED_PIN        GPIO_PIN_13                                // Progress LED pin, flashes during flash update
-#define PROGRESS_LED_PORT        GPIOA                                    // Progress LED port
+#define PROGRESS_LED_PIN         GPIO_PIN_13                            // Progress LED pin, flashes during flash update
+#define PROGRESS_LED_PORT        GPIOA                                  // Progress LED port
 
-#define DFU_ON_DOUBLE_RESET                                                // Double reset to start DFU mode, comment out to disable
-#define DFU_MAGIC_KEY            0xBA5EBA11                                // Magic key to detect DFU mode
-#define DFU_MAGIC_KEY_ADDRESS    RTC->BKP31R                                // Store the magic key at RTC backup register 31
+#define DFU_ON_DOUBLE_RESET                                             // Double reset to start DFU mode, comment out to disable
+#define DFU_MAGIC_KEY            0xBA5EBA11                             // Magic key to detect DFU mode
+#define DFU_MAGIC_KEY_ADDRESS    RTC->BKP31R                            // Store the magic key at RTC backup register 31
 
-#define FLASHWORD                (FLASH_NB_32BITWORD_IN_FLASHWORD * 4U)    // 32 bytes on STM32H7
-#define FILE_BUFFER_SIZE        4096UL                                    // File buffer size, must be dividable by FLASHWORD
+#define FLASHWORD                (FLASH_NB_32BITWORD_IN_FLASHWORD * 4U) // 32 bytes on STM32H7
+#define FILE_BUFFER_SIZE         4096UL                                 // File buffer size, must be dividable by FLASHWORD
 
-#define FLASH_BOOTLOADER_SIZE    (FLASH_SECTOR_SIZE * 1)                    // Bootloader flash size (1 sector)
-#define FLASH_USER_START_SECTOR    1U                                        // Bootloader in sector 0, start from sector 1
-#define FLASH_USER_START_ADDR    (FLASH_BASE + FLASH_BOOTLOADER_SIZE)    // Should start on a new sector boundary
+#define FLASH_BOOTLOADER_SIZE    (FLASH_SECTOR_SIZE * 1)                // Bootloader flash size (1 sector)
+#define FLASH_USER_START_SECTOR  1U                                     // Bootloader in sector 0, start from sector 1
+#define FLASH_USER_START_ADDR    (FLASH_BASE + FLASH_BOOTLOADER_SIZE)   // Should start on a new sector boundary
 
 /* STM32 DFU bootloader addresses
    STM32C0   0x1FFF0000 | STM32F030x8 0x1FFFEC00 | STM32F030xC 0x1FFFD800 | STM32F03xx 0x1FFFEC00
