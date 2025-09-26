@@ -61,25 +61,25 @@ CFG_TUH_MEM_SECTION static struct
 
 #define FAST_SPI                                                        // Use a faster/leaner SPI implementation
 
-#define VERBOSE_MODE													// Comment out to disable sending info to USART (250K baud)
-#define COMPARE_BEFORE_FLASH											// Comment out to not compare the firmware file to the flash contents (faster)
-#define FIRMWARE_FILENAME		"firmware.bin"							// The firmware file to flash
-#define FIRMWARE_RENAME			"firmware.cur"							// Rename the firmware after flashing
+#define VERBOSE_MODE                                                    // Comment out to disable sending info to USART (250K baud)
+#define COMPARE_BEFORE_FLASH                                            // Comment out to not compare the firmware file to the flash contents (faster)
+#define FIRMWARE_FILENAME        "firmware.bin"                            // The firmware file to flash
+#define FIRMWARE_RENAME            "firmware.cur"                            // Rename the firmware after flashing
 
 // Make sure pins don't interfere with SWD debug pins PA13 and PA14, disable when debugging
-#define PROGRESS_LED_PIN		GPIO_PIN_13								// Progress LED pin, flashes during flash update
-#define PROGRESS_LED_PORT		GPIOA									// Progress LED port
+#define PROGRESS_LED_PIN        GPIO_PIN_13                                // Progress LED pin, flashes during flash update
+#define PROGRESS_LED_PORT        GPIOA                                    // Progress LED port
 
-#define DFU_ON_DOUBLE_RESET												// Double reset to start DFU mode, comment out to disable
-#define DFU_MAGIC_KEY			0xBA5EBA11								// Magic key to detect DFU mode
-#define DFU_MAGIC_KEY_ADDRESS	RTC->BKP31R								// Store the magic key at RTC backup register 31
+#define DFU_ON_DOUBLE_RESET                                                // Double reset to start DFU mode, comment out to disable
+#define DFU_MAGIC_KEY            0xBA5EBA11                                // Magic key to detect DFU mode
+#define DFU_MAGIC_KEY_ADDRESS    RTC->BKP31R                                // Store the magic key at RTC backup register 31
 
-#define FLASHWORD				(FLASH_NB_32BITWORD_IN_FLASHWORD * 4U)	// 32 bytes on STM32H7
-#define FILE_BUFFER_SIZE		4096UL									// File buffer size, must be dividable by FLASHWORD
+#define FLASHWORD                (FLASH_NB_32BITWORD_IN_FLASHWORD * 4U)    // 32 bytes on STM32H7
+#define FILE_BUFFER_SIZE        4096UL                                    // File buffer size, must be dividable by FLASHWORD
 
-#define FLASH_BOOTLOADER_SIZE	(FLASH_SECTOR_SIZE * 1)					// Bootloader flash size (1 sector)
-#define FLASH_USER_START_SECTOR	1U										// Bootloader in sector 0, start from sector 1
-#define FLASH_USER_START_ADDR	(FLASH_BASE + FLASH_BOOTLOADER_SIZE)	// Should start on a new sector boundary
+#define FLASH_BOOTLOADER_SIZE    (FLASH_SECTOR_SIZE * 1)                    // Bootloader flash size (1 sector)
+#define FLASH_USER_START_SECTOR    1U                                        // Bootloader in sector 0, start from sector 1
+#define FLASH_USER_START_ADDR    (FLASH_BASE + FLASH_BOOTLOADER_SIZE)    // Should start on a new sector boundary
 
 /* STM32 DFU bootloader addresses
    STM32C0   0x1FFF0000 | STM32F030x8 0x1FFFEC00 | STM32F030xC 0x1FFFD800 | STM32F03xx 0x1FFFEC00
@@ -91,7 +91,7 @@ CFG_TUH_MEM_SECTION static struct
    STM32L1   0x1FF00000 | STM32L4     0x1FFF0000 | STM32L5     0x0BF90000 | STM32WBA   0x0BF88000
    STM32WBX  0x1FFF0000 | STM32WL     0x1FFF0000 | STM32U5     0x0BF90000 */
 
-#define DFU_BOOTLOADER_ADDRESS	0x1FF09800U	// STM32H7xx address to start the DFU bootloader
+#define DFU_BOOTLOADER_ADDRESS    0x1FF09800U    // STM32H7xx address to start the DFU bootloader
 
 /* FATFS ERROR CODES
  0 Succeeded
@@ -132,7 +132,7 @@ UART_HandleTypeDef huart1;
 
 FATFS FatFs;                          // FAT File System handle
 FIL fwFile;                           // File handle for the firmware file
-FRESULT result;		                  // File operation result
+FRESULT result;                          // File operation result
 uint32_t fileSize;                    // Firmware file size in bytes
 uint8_t fileBuffer[FILE_BUFFER_SIZE] __attribute__((aligned(4))); // File read buffer
 volatile bool _disk_busy = false;     // For FatFs
@@ -157,249 +157,254 @@ static void MX_USART1_UART_Init(void);
 #define CRC32_START 0xFFFFFFFF  // Start value for the CRC32 calculation
 uint32_t crc32b(uint32_t crc, uint8_t *data, uint32_t size)
 {
-	for (int i = 0; i < size; i++)
-	{
-		crc = crc ^ data[i];
-		for (int j = 8; j; j--)
-			crc = (crc >> 1) ^ (0xEDB88320 & -(crc & 1));
-	}
-	return ~crc;
+    for (int i = 0; i < size; i++)
+    {
+        crc = crc ^ data[i];
+        for (int j = 8; j; j--)
+            crc = (crc >> 1) ^ (0xEDB88320 & -(crc & 1));
+    }
+    return ~crc;
 }
 
 #ifdef VERBOSE_MODE // No serial output if not in VERBOSE_MODE
 
-	// Lightweight printf, prints to uart (DEBUG_USART_HANDLE), no floats, no width control
-	void uart_printf(const char * fmt, ...)
-	{
-		va_list va;
-		va_start(va, fmt);
-		char debug_msg[255]; // Message buffer
-		char * buf = debug_msg;
-		char c;
-		unsigned int num;
-		while ((c = *(fmt++)))
-		{
-			int width = 0;
-			if (c == '%')
-			{
-				int base = 2;
-				int s_int = 0;
-			MORE_FORMAT:
-				c = *(fmt++); // Skip '%', check parameter
-				switch (c)
-				{
-					case '0'...'9': // Width indicators
-				  	width = (width * 10) + c - '0';
-					goto MORE_FORMAT;
+    // Lightweight printf, prints to uart (DEBUG_USART_HANDLE), no floats, no width control
+    void uart_printf(const char * fmt, ...)
+    {
+        va_list va;
+        va_start(va, fmt);
+        char debug_msg[255]; // Message buffer
+        char * buf = debug_msg;
+        char space_zero = ' ';
+        char c;
+        unsigned int num;
+        while ((c = *(fmt++)))
+        {
+            int width = 0;
+            if (c == '%')
+            {
+                int base = 2;
+                int s_int = 0;
+            MORE_FORMAT:
+                c = *(fmt++); // Skip '%', check parameter
+                switch (c)
+                {
+                    case '0':
+                        if (width == 0)
+                            space_zero = '0';
+                    case '1'...'9': // Width indicators
+                          width = (width * 10) + c - '0';
+                    goto MORE_FORMAT;
 
-					case '%': // "%%" prints "%"
-				 	   *(buf++) = '%';
-					break;
+                    case '%': // "%%" prints "%"
+                         *(buf++) = '%';
+                    break;
 
-					case 'c': // Character
-				 	   *(buf++) = va_arg(va, int);
-					break;
+                    case 'c': // Character
+                         *(buf++) = va_arg(va, int);
+                    break;
 
-					case 'd': // Signed integer, base 10
-					case 'i': base = 10;
-						s_int = va_arg(va, int);
-						if (s_int < 0)
-					   		num = -s_int;
-						else
-					  		num = s_int;
-				  	goto ATOI;
-					case 'x':	   // Hexadecimal, base 16
-						base += 6; // 2 + 6 + 8 is base 16
-					case 'u':	   // Unsigned integer, base 10
-						base += 8; // 2 + 8 is base 10
-					case 'b':	   // Binary, base 2
-						num = va_arg(va, unsigned int);
-				  	ATOI:
-						char tmp[32]; // 32bit
-						char *q = tmp;
+                    case 'd': // Signed integer, base 10
+                    case 'i': base = 10;
+                        s_int = va_arg(va, int);
+                        if (s_int < 0)
+                               num = -s_int;
+                        else
+                              num = s_int;
+                      goto ATOI;
+                    case 'x':
+                    case 'X':      // Hexadecimal, base 16
+                        base += 6; // 2 + 6 + 8 is base 16
+                    case 'u':      // Unsigned integer, base 10
+                        base += 8; // 2 + 8 is base 10
+                    case 'b':      // Binary, base 2
+                        num = va_arg(va, unsigned int);
+                      ATOI:
+                        char tmp[32]; // 32bit
+                        char *q = tmp;
 
-						do
-						{
-							int rem = '0' + (num % base);
-							if (rem > '9')
-						  		rem += 7; // Map to 'ABCDEF'
-					   		*(q++) = rem;
-						} while ((num /= base));
+                        do
+                        {
+                            int rem = '0' + (num % base);
+                            if (rem > '9')
+                                  rem += 7; // Map to 'ABCDEF'
+                               *(q++) = rem;
+                        } while ((num /= base));
 
-						if (s_int < 0)
-					  		*(q++) = '-';
+                        if (s_int < 0)
+                              *(q++) = '-';
 
-						width -= q - tmp;
-						while (width-- > 0)
-					  		*(buf++) = ' ';
+                        width -= q - tmp;
+                        while (width-- > 0)
+                              *(buf++) = space_zero;
 
-				   		while (tmp < q) // Reverse data order, "123" --> "321"
-					   	*(buf++) = *(--q);
-					break;
+                           while (tmp < q) // Reverse data order, "123" --> "321"
+                           *(buf++) = *(--q);
+                    break;
 
-					case 's':  // String
-					{
-						const char *p = va_arg(va, const char *);
-						while (*p)
-							*(buf++) = *(p++);
-					}
-				}
-			}
-			else
-				*(buf++) = c; // Copy literal characters
-		}
-		*buf = '\0'; // Terminate string
+                    case 's':  // String
+                    {
+                        const char *p = va_arg(va, const char *);
+                        while (*p)
+                            *(buf++) = *(p++);
+                    }
+                }
+            }
+            else
+                *(buf++) = c; // Copy literal characters
+        }
+        *buf = '\0'; // Terminate string
 
-		va_end(va);
+        va_end(va);
 
-		HAL_UART_Transmit(&DEBUG_USART_HANDLE, (uint8_t *)debug_msg, buf - debug_msg, HAL_MAX_DELAY);
+        HAL_UART_Transmit(&DEBUG_USART_HANDLE, (uint8_t *)debug_msg, buf - debug_msg, HAL_MAX_DELAY);
 
-		#ifdef PROGRESS_LED_PIN
-			HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN); // Flash LED
-		#endif
-	}
+        #ifdef PROGRESS_LED_PIN
+            HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN); // Flash LED
+        #endif
+    }
 
 #else
 
-	#ifdef PROGRESS_LED_PIN
-		void uart_printf(const char * fmt, ...) { HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN); }
-	#else
-		void uart_printf(const char * fmt, ...) { }
-	#endif
+    #ifdef PROGRESS_LED_PIN
+        void uart_printf(const char * fmt, ...) { HAL_GPIO_TogglePin(PROGRESS_LED_PORT, PROGRESS_LED_PIN); }
+    #else
+        void uart_printf(const char * fmt, ...) { }
+    #endif
 
 #endif
 
 #ifdef DFU_ON_DOUBLE_RESET
 
-	#define set_magic_key(a) *(__IO uint32_t *)DFU_MAGIC_KEY_ADDRESS = a; \
-							 *(__IO uint32_t *)DFU_MAGIC_KEY_ADDRESS = a
+    #define set_magic_key(a) *(__IO uint32_t *)DFU_MAGIC_KEY_ADDRESS = a; \
+                             *(__IO uint32_t *)DFU_MAGIC_KEY_ADDRESS = a
 
 #else
 
-	#define set_magic_key(a)
+    #define set_magic_key(a)
 
 #endif
 
 // Return value: 0=equal, 1=different, 2=error
 uint32_t compareFlashToFile(void)
 {
-	uint32_t i = 0, j;
-	uint32_t file_crc32 = ~CRC32_START; // Invert here, will be undone in crc32b
-	int difference_found = 0;
-	int different = 0;
+    uint32_t i = 0, j;
+    uint32_t file_crc32 = ~CRC32_START; // Invert here, will be undone in crc32b
+    int difference_found = 0;
+    int different = 0;
     unsigned int bytesRead;
-	int result = f_lseek(&fwFile, 0); // Not strictly needed
+    int result = f_lseek(&fwFile, 0); // Not strictly needed
 
-	while ((i < fileSize) && !result)
-	{
-		result = f_read(&fwFile, fileBuffer, FILE_BUFFER_SIZE, &bytesRead);
-		file_crc32 = crc32b(~file_crc32, fileBuffer, bytesRead);
-		j = 0;
-		while ((j < bytesRead) && !result)
-		{
-			if (*(__IO char*)(FLASH_USER_START_ADDR + i + j) != fileBuffer[j])
-				difference_found = 1;
-			j++;
-		}
+    while ((i < fileSize) && !result)
+    {
+        result = f_read(&fwFile, fileBuffer, FILE_BUFFER_SIZE, &bytesRead);
+        file_crc32 = crc32b(~file_crc32, fileBuffer, bytesRead);
+        j = 0;
+        while ((j < bytesRead) && !result)
+        {
+            if (*(__IO char*)(FLASH_USER_START_ADDR + i + j) != fileBuffer[j])
+                difference_found = 1;
+            j++;
+        }
 
-		if (difference_found)
-		{
-			uart_printf("*");
-			different = 1;
-			difference_found = 0; // Reset block different status
-		}
-		else
-			uart_printf("=");
+        if (difference_found)
+        {
+            uart_printf("*");
+            different = 1;
+            difference_found = 0; // Reset block different status
+        }
+        else
+            uart_printf("=");
 
-		i += bytesRead;
-	}
+        i += bytesRead;
+    }
 
-	if (result)
-	{
-		uart_printf(" Error\r\nFile read error: %d\r\n", result);
-		return 2;
-	}
-	else
-	if (different)
-		uart_printf(" Different\r\nFlash contents differs, update is required\r\n");
-	else
-	{
-		uart_printf(" Equal\r\nFlash contents is the same, update is not required\r\n");
-		uart_printf("Flash CRC32: 0x%x\r\n", file_crc32);
-	}
+    if (result)
+    {
+        uart_printf(" Error\r\nFile read error: %d\r\n", result);
+        return 2;
+    }
+    else
+    if (different)
+        uart_printf(" Different\r\nFlash contents differs, update is required\r\n");
+    else
+    {
+        uart_printf(" Equal\r\nFlash contents is the same, update is not required\r\n");
+        uart_printf("Flash CRC32: 0x%x\r\n", file_crc32);
+    }
 
-	return different; // 0=equal, 1=different, 2=file read error
+    return different; // 0=equal, 1=different, 2=file read error
 }
 
 // Return value: 0=OK, 1=failed/error
 int CopyFileToFlashMemory(void)
 {
-	// STM32H7xx FLASH SECTORS 0-7 all are 128 KBytes (FLASH_SECTOR_SIZE)
+    // STM32H7xx FLASH SECTORS 0-7 all are 128 KBytes (FLASH_SECTOR_SIZE)
 
-  	// Erase required sectors to fit the user application
-  	uint32_t erasedSize = 0;
-  	uint32_t sector = FLASH_USER_START_SECTOR;
+      // Erase required sectors to fit the user application
+      uint32_t erasedSize = 0;
+      uint32_t sector = FLASH_USER_START_SECTOR;
 
-  	HAL_FLASH_Unlock();
-  	FRESULT result = f_lseek(&fwFile, 0);
+      HAL_FLASH_Unlock();
+      FRESULT result = f_lseek(&fwFile, 0);
 
-  	while ((erasedSize < fileSize) && !result)
-  	{
-  	    uart_printf("Erasing 128KB flash sector %d\r\n", sector);
+      while ((erasedSize < fileSize) && !result)
+      {
+          uart_printf("Erasing 128KB flash sector %d\r\n", sector);
 
-  		FLASH_Erase_Sector(sector, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_3);
+          FLASH_Erase_Sector(sector, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_3);
 
-  		erasedSize += FLASH_SECTOR_SIZE;
-  		sector++;
-  	}
+          erasedSize += FLASH_SECTOR_SIZE;
+          sector++;
+      }
 
-  	uart_printf("Flashing user application to 0x0%x\r\n", FLASH_USER_START_ADDR);
+      uart_printf("Flashing user application to 0x0%x\r\n", FLASH_USER_START_ADDR);
 
-  	uint32_t byteCounter = 0;
-  	uint32_t i;
-  	uint32_t file_crc32 = ~CRC32_START; // Invert here, will be undone in crc32b
+      uint32_t byteCounter = 0;
+      uint32_t i;
+      uint32_t file_crc32 = ~CRC32_START; // Invert here, will be undone in crc32b
     unsigned int bytesRead;
 
-  	while ((byteCounter < fileSize) && !result)
-  	{
-  		// f_read will always return a full buffer, except at the end of the file
-  		result = f_read(&fwFile, fileBuffer, FILE_BUFFER_SIZE, &bytesRead);
-  		file_crc32 = crc32b(~file_crc32, fileBuffer, bytesRead);
+      while ((byteCounter < fileSize) && !result)
+      {
+          // f_read will always return a full buffer, except at the end of the file
+          result = f_read(&fwFile, fileBuffer, FILE_BUFFER_SIZE, &bytesRead);
+          file_crc32 = crc32b(~file_crc32, fileBuffer, bytesRead);
 
-  		if (bytesRead < FILE_BUFFER_SIZE) // Add some "erased flash" bytes to the buffer at the end of the file
-  			memset(fileBuffer + bytesRead, 0xFF, (FILE_BUFFER_SIZE - bytesRead) % FLASHWORD);
+          if (bytesRead < FILE_BUFFER_SIZE) // Add some "erased flash" bytes to the buffer at the end of the file
+              memset(fileBuffer + bytesRead, 0xFF, (FILE_BUFFER_SIZE - bytesRead) % FLASHWORD);
 
-  		// Write FLASHWORDs to flash memory
-  		i = 0;
-  		while ((i < bytesRead) && !result)
-  		{
-  			result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, FLASH_USER_START_ADDR + byteCounter + i, (volatile uint32_t)(fileBuffer + i));
-  			i += FLASHWORD;
-  		}
-  		byteCounter += bytesRead;
-  		uart_printf("=");
-  	}
+          // Write FLASHWORDs to flash memory
+          i = 0;
+          while ((i < bytesRead) && !result)
+          {
+              result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, FLASH_USER_START_ADDR + byteCounter + i, (volatile uint32_t)(fileBuffer + i));
+              i += FLASHWORD;
+          }
+          byteCounter += bytesRead;
+          uart_printf("=");
+      }
 
-  	HAL_FLASH_Lock();
+      HAL_FLASH_Lock();
 
 
-  	if (!result) // All went OK, verify flash contents
-  	{
-  		uint32_t flash_crc32 = crc32b(CRC32_START, (uint8_t*)FLASH_USER_START_ADDR, fileSize);
+      if (!result) // All went OK, verify flash contents
+      {
+          uint32_t flash_crc32 = crc32b(CRC32_START, (uint8_t*)FLASH_USER_START_ADDR, fileSize);
         if (file_crc32 != flash_crc32)
         {
-  			uart_printf("* Verify failed\r\n");
+              uart_printf("* Verify failed\r\n");
             result = 1; // Signal error
         }
-  		else
-  			uart_printf(" Verify OK\r\n");
+          else
+              uart_printf(" Verify OK\r\n");
 
-  		uart_printf("Flash CRC32: 0x%x\r\n", flash_crc32);
-  	}
-  	else
-  	  uart_printf(" Failed: %d\r\n", result);
+          uart_printf("Flash CRC32: 0x%x\r\n", flash_crc32);
+      }
+      else
+        uart_printf(" Failed: %d\r\n", result);
 
-  	return result;
+      return result;
 }
 
 // -----------------------------------------------------------------
@@ -449,23 +454,23 @@ void HAL_SPI_TransmitReceive_fast(const uint8_t *pTxData, uint8_t *pRxData, uint
 
   while (tx_count || rx_count)
   {
-  	if (tx_count && (*SR & SPI_FLAG_TXE))
-  	{
-  		if (pTxData)
-  			*TXDR = *pTxData++;
-  		else
-  			*TXDR = 0xFF;
-  		tx_count--;
-  	}
+      if (tx_count && (*SR & SPI_FLAG_TXE))
+      {
+          if (pTxData)
+              *TXDR = *pTxData++;
+          else
+              *TXDR = 0xFF;
+          tx_count--;
+      }
 
-  	if (rx_count && (*SR & SPI_FLAG_RXNE))
-  	{
-  		if (pRxData)
-  		  *pRxData++ = *RXDR;
-  		else
-  		  dummy = *RXDR;
-  		rx_count--;
-  	}
+      if (rx_count && (*SR & SPI_FLAG_RXNE))
+      {
+          if (pRxData)
+            *pRxData++ = *RXDR;
+          else
+            dummy = *RXDR;
+          rx_count--;
+      }
   }
 
   // Call standard close procedure with error check
@@ -530,12 +535,12 @@ static bool inquiry_complete_cb(uint8_t dev_addr, tuh_msc_complete_data_t const 
   result = f_mount(&FatFs, "", 1);
   if (result)
   {
-  	if (result == 3)
-  	   	uart_printf("No medium mounted, status: 3\r\n");
-  	else
-  	   	uart_printf("ERROR: USB mounting failed, not FAT/exFAT formatted? Error: %d\r\n", result);
+      if (result == 3)
+             uart_printf("No medium mounted, status: 3\r\n");
+      else
+             uart_printf("ERROR: USB mounting failed, not FAT/exFAT formatted? Error: %d\r\n", result);
 
-  	goto USER_APP;
+      goto USER_APP;
   }
 
   uart_printf(FIRMWARE_FILENAME);
@@ -566,15 +571,15 @@ static bool inquiry_complete_cb(uint8_t dev_addr, tuh_msc_complete_data_t const 
 
   #ifdef COMPARE_BEFORE_FLASH
 
-  	  uart_printf("Comparing update to flash contents\r\n");
+        uart_printf("Comparing update to flash contents\r\n");
 
-  	  result = compareFlashToFile(); // Return value: 0=equal, 1=different, 2=error
+        result = compareFlashToFile(); // Return value: 0=equal, 1=different, 2=error
 
-  	  if (result > 1) // File read error
-  		  goto USER_APP;
+        if (result > 1) // File read error
+            goto USER_APP;
 
-  	  if (result == 1) // Flash is different, update required
-  		  result = CopyFileToFlashMemory(); // Return value: 0=OK, 1=failed/error
+        if (result == 1) // Flash is different, update required
+            result = CopyFileToFlashMemory(); // Return value: 0=OK, 1=failed/error
 
   #else // Just flash the file
 
@@ -588,13 +593,13 @@ static bool inquiry_complete_cb(uint8_t dev_addr, tuh_msc_complete_data_t const 
 
   if (!result) // Only rename/delete if file was flashed successfully
   {
-	  f_unlink(FIRMWARE_RENAME); // Delete the old firmware (if present)
+      f_unlink(FIRMWARE_RENAME); // Delete the old firmware (if present)
 
-	  if (f_rename(FIRMWARE_FILENAME, FIRMWARE_RENAME) != FR_OK)
-	  {
+      if (f_rename(FIRMWARE_FILENAME, FIRMWARE_RENAME) != FR_OK)
+      {
           uart_printf("ERROR: Failed to rename firmware file to ");
           result = 1; // Signal error
-	  }
+      }
       else
           uart_printf("Renaming file to ");
 
@@ -614,7 +619,7 @@ static bool inquiry_complete_cb(uint8_t dev_addr, tuh_msc_complete_data_t const 
         uart_printf("Starting user application at 0x0%x\r\n", FLASH_USER_START_ADDR);
         HAL_Delay(25);
 
-      	tuh_max3421_int_api(0, false);
+          tuh_max3421_int_api(0, false);
         HAL_RCC_DeInit(); // Set the clock to the default state
         HAL_DeInit();
 
@@ -670,47 +675,47 @@ DSTATUS disk_status (BYTE pdrv) // Physical drive number should be 0
 DSTATUS disk_initialize (BYTE pdrv) // Physical drive number should be 0
 {
   (void) pdrv;
-	return 0; // nothing to do
+    return 0; // nothing to do
 }
 
 DRESULT disk_read (
-	BYTE pdrv,		// Physical drive nmuber to identify the drive
-	BYTE *buff,		// Data buffer to store read data
-	LBA_t sector,	// Start sector in LBA
-	UINT count)		// Number of sectors to read
+    BYTE pdrv,        // Physical drive nmuber to identify the drive
+    BYTE *buff,        // Data buffer to store read data
+    LBA_t sector,    // Start sector in LBA
+    UINT count)        // Number of sectors to read
 {
-	uint8_t const dev_addr = pdrv + 1;
-	uint8_t const lun = 0;
+    uint8_t const dev_addr = pdrv + 1;
+    uint8_t const lun = 0;
 
-	_disk_busy = true;
-	tuh_msc_read10(dev_addr, lun, buff, sector, (uint16_t) count, disk_io_complete, 0);
-	wait_for_disk_io(pdrv);
+    _disk_busy = true;
+    tuh_msc_read10(dev_addr, lun, buff, sector, (uint16_t) count, disk_io_complete, 0);
+    wait_for_disk_io(pdrv);
 
-	return RES_OK;
+    return RES_OK;
 }
 
 #if (FF_FS_READONLY == 0)
 DRESULT disk_write (
-	BYTE pdrv,        /* Physical drive number to identify the drive */
-	const BYTE *buff, /* Data to be written */
-	LBA_t sector,     /* Start sector in LBA */
-	UINT count)       /* Number of sectors to write */
+    BYTE pdrv,        /* Physical drive number to identify the drive */
+    const BYTE *buff, /* Data to be written */
+    LBA_t sector,     /* Start sector in LBA */
+    UINT count)       /* Number of sectors to write */
 {
-	uint8_t const dev_addr = pdrv + 1;
-	uint8_t const lun = 0;
+    uint8_t const dev_addr = pdrv + 1;
+    uint8_t const lun = 0;
 
-	_disk_busy = true;
-	tuh_msc_write10(dev_addr, lun, buff, sector, (uint16_t) count, disk_io_complete, 0);
-	wait_for_disk_io(pdrv);
+    _disk_busy = true;
+    tuh_msc_write10(dev_addr, lun, buff, sector, (uint16_t) count, disk_io_complete, 0);
+    wait_for_disk_io(pdrv);
 
-	return RES_OK;
+    return RES_OK;
 }
 #endif
 
 DRESULT disk_ioctl (
-	BYTE pdrv,		/* Physical drive number (0..) */
-	BYTE cmd,		/* Control code */
-	void *buff)		/* Buffer to send/receive control data */
+    BYTE pdrv,        /* Physical drive number (0..) */
+    BYTE cmd,        /* Control code */
+    void *buff)        /* Buffer to send/receive control data */
 {
   uint8_t const dev_addr = pdrv + 1;
   uint8_t const lun = 0;
@@ -781,19 +786,19 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   #define rHIRQ         (25 << 3)
-  #define bmFRAMEIRQ	0x40
+  #define bmFRAMEIRQ    0x40
   bool MAX3421_wait_frames(uint32_t frames, uint32_t timeout)
   {
-	tuh_max3421_reg_write(0, rHIRQ, bmFRAMEIRQ, false); // clear the FRAME interrupt
-  	uint32_t start = HAL_GetTick();
-  	while (frames && (HAL_GetTick() - start < timeout))
-  	{
-   		if (tuh_max3421_reg_read(0, rHIRQ, false) & bmFRAMEIRQ)
-   		{
-		  tuh_max3421_reg_write(0, rHIRQ, bmFRAMEIRQ, false); // clear the FRAME interrupt
-		  frames--;
-   		}
-  	}
+    tuh_max3421_reg_write(0, rHIRQ, bmFRAMEIRQ, false); // clear the FRAME interrupt
+      uint32_t start = HAL_GetTick();
+      while (frames && (HAL_GetTick() - start < timeout))
+      {
+           if (tuh_max3421_reg_read(0, rHIRQ, false) & bmFRAMEIRQ)
+           {
+          tuh_max3421_reg_write(0, rHIRQ, bmFRAMEIRQ, false); // clear the FRAME interrupt
+          frames--;
+           }
+      }
 //    tuh_task();
     return (frames > 0);
   }
@@ -805,28 +810,28 @@ int main(void)
 
 #ifdef DFU_ON_DOUBLE_RESET
 
-	// Detect magic key
-	if (*(__IO uint32_t*)DFU_MAGIC_KEY_ADDRESS == DFU_MAGIC_KEY)
-	{
-		set_magic_key(0);
-		MX_GPIO_Init();
-		MX_USART1_UART_Init();
-		uart_printf("\r\nStarting DFU mode\r\n");
-		HAL_Delay(25);
+    // Detect magic key
+    if (*(__IO uint32_t*)DFU_MAGIC_KEY_ADDRESS == DFU_MAGIC_KEY)
+    {
+        set_magic_key(0);
+        MX_GPIO_Init();
+        MX_USART1_UART_Init();
+        uart_printf("\r\nStarting DFU mode\r\n");
+        HAL_Delay(25);
 
-		tuh_max3421_int_api(0, false);
-		HAL_RCC_DeInit(); // Set the clock to the default state
-		HAL_DeInit();
+        tuh_max3421_int_api(0, false);
+        HAL_RCC_DeInit(); // Set the clock to the default state
+        HAL_DeInit();
 
-		uint32_t *vtor = (void*)DFU_BOOTLOADER_ADDRESS;
-		SCB->VTOR = (uint32_t)vtor;
+        uint32_t *vtor = (void*)DFU_BOOTLOADER_ADDRESS;
+        SCB->VTOR = (uint32_t)vtor;
 
-		// Make the jump
-		asm volatile("MSR msp,%0\nbx %1" : : "r"(vtor[0]), "r"(vtor[1]));
-	}
+        // Make the jump
+        asm volatile("MSR msp,%0\nbx %1" : : "r"(vtor[0]), "r"(vtor[1]));
+    }
 
-  	// Wait for 2nd reset while DFU marker is set
-	set_magic_key(DFU_MAGIC_KEY);
+      // Wait for 2nd reset while DFU marker is set
+    set_magic_key(DFU_MAGIC_KEY);
 
 #endif
 
@@ -834,11 +839,11 @@ int main(void)
 
 #ifdef DFU_ON_DOUBLE_RESET
 
-	set_magic_key(0);
+    set_magic_key(0);
 
 #endif
 
-	uart_printf("MAX3421 USB bootloader started\r\n");
+    uart_printf("MAX3421 USB bootloader started\r\n");
 
   /* USER CODE END 2 */
 
@@ -849,11 +854,11 @@ int main(void)
   {
     tuh_task();
 
-	// Timeout counter
-	if (dontwait | (HAL_GetTick() > 2200)) // Usually takes 1150-2200ms
-	{
-		uart_printf("Time: %ums   Timeout...\r\n", HAL_GetTick());
-		set_magic_key(0); // IMPORTANT, KEEP HERE
+    // Timeout counter
+    if (dontwait | (HAL_GetTick() > 2200)) // Usually takes 1150-2200ms
+    {
+        uart_printf("Time: %ums   Timeout...\r\n", HAL_GetTick());
+        set_magic_key(0); // IMPORTANT, KEEP HERE
 
         f_mount(NULL, "", 0); // Unmount USB, not strictly needed, comment out to save some flash
 
@@ -862,7 +867,7 @@ int main(void)
             uart_printf("Starting user application at 0x0%x\r\n", FLASH_USER_START_ADDR);
             HAL_Delay(25);
 
-    		tuh_max3421_int_api(0, false);
+            tuh_max3421_int_api(0, false);
             HAL_RCC_DeInit(); // Set the clock to the default state
             HAL_DeInit();
 
@@ -882,7 +887,7 @@ int main(void)
                 HAL_Delay(1500);
             #endif
         };
-	}
+    }
 
     /* USER CODE END WHILE */
 
