@@ -172,16 +172,21 @@ void uart_printf(const char *fmt, ...) {
 	va_start(va, fmt);
 	char debug_msg[255]; // Message buffer
 	char *buf = debug_msg;
-	char space_zero = ' ';
+	char space_zero;
 	char c;
 	unsigned int num;
+
 	while ((c = *(fmt++))) {
-		int width = 0;
+
 		if (c == '%') {
+			space_zero = ' ';
+			int width = 0;
 			int base = 2;
 			int s_int = 0;
-			MORE_FORMAT: c = *(fmt++); // Skip '%', check parameter
-			switch (c) {
+			MORE_FORMAT:
+				c = *(fmt++); // Skip '%', check parameters
+
+				switch (c) {
 			case '0':
 				if (width == 0)
 					space_zero = '0';
