@@ -75,7 +75,7 @@ CFG_TUH_MEM_SECTION static struct {
 #define DFU_MAGIC_KEY_ADDRESS    RTC->BKP31R                            // Store the magic key at RTC backup register 31
 
 #define FLASHWORD                (FLASH_NB_32BITWORD_IN_FLASHWORD * 4U) // 32 bytes on STM32H7
-#define FILE_BUFFER_SIZE         4096UL                                 // File buffer size, must be dividable by FLASHWORD
+#define FILE_BUFFER_SIZE         4096UL                                 // File buffer size, must be divisible by FLASHWORD
 
 #define FLASH_BOOTLOADER_SIZE    (FLASH_SECTOR_SIZE * 1)                // Bootloader flash size (1 sector of 128KBytes)
 #define FLASH_USER_START_SECTOR  1U                                     // Bootloader in sector 0, user app starts at sector 1
