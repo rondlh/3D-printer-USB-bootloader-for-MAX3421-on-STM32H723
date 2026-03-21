@@ -1,6 +1,6 @@
 ../Core/Src/main.c:628:13:disk_io_complete	1
-../Core/Src/main.c:1038:13:MX_GPIO_Init	1
-../Core/Src/main.c:992:13:MX_USART1_UART_Init	5
+../Core/Src/main.c:1046:13:MX_GPIO_Init	1
+../Core/Src/main.c:998:13:MX_USART1_UART_Init	5
 ../Core/Src/main.c:158:10:crc32b	3
 ../Core/Src/main.c:170:6:uart_printf	21
 ../Core/Src/main.c:279:10:compareFlashToFile	10
@@ -17,9 +17,9 @@
 ../Core/Src/main.c:645:9:disk_read	3
 ../Core/Src/main.c:664:9:disk_write	2
 ../Core/Src/main.c:680:9:disk_ioctl	5
-../Core/Src/main.c:714:6:MAX3421_wait_frames	4
-../Core/Src/main.c:870:6:SystemClock_Config	4
-../Core/Src/main.c:927:6:PeriphCommonClock_Config	2
+../Core/Src/main.c:712:6:MAX3421_wait_frames	4
+../Core/Src/main.c:871:6:SystemClock_Config	4
+../Core/Src/main.c:931:6:PeriphCommonClock_Config	2
 ../Core/Src/main.c:731:5:main	6
-../Core/Src/main.c:1125:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:1141:6:Error_Handler	1
+../Core/Src/main.c:1136:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:1154:6:Error_Handler	1
