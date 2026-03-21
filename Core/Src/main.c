@@ -593,6 +593,8 @@ static bool inquiry_complete_cb(uint8_t dev_addr, tuh_msc_complete_data_t const 
 
 		uint32_t *vtor = (void*) FLASH_USER_START_ADDR;
 		SCB->VTOR = (uint32_t) vtor;
+		__DSB();
+		__ISB();
 
 		// Make the jump
 		asm volatile("MSR msp,%0\nbx %1" : : "r"(vtor[0]), "r"(vtor[1]));
@@ -785,9 +787,9 @@ int main(void) {
 
 		uint32_t *vtor = (void*) DFU_BOOTLOADER_ADDRESS;
 		SCB->VTOR = (uint32_t) vtor;
-
 		__DSB();
 		__ISB();
+
 		// Make the jump
 		asm volatile("MSR msp,%0\nbx %1" : : "r"(vtor[0]), "r"(vtor[1]));
 	}
@@ -836,9 +838,9 @@ int main(void) {
 				HAL_DeInit();
 
 				SCB->VTOR = FLASH_USER_START_ADDR;
-
 				__DSB();
 				__ISB();
+
 				uint32_t jump_addr = *(__IO uint32_t*) (FLASH_USER_START_ADDR + 4);
 				__set_MSP(*(__IO uint32_t*) FLASH_USER_START_ADDR);
 				((void (*)(void)) jump_addr)(); /* never returns */
