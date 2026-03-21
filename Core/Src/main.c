@@ -179,10 +179,10 @@ void uart_printf(const char *fmt, ...) {
 	while ((c = *(fmt++))) {
 
 		if (c == '%') {
-			space_zero = ' ';
 			int width = 0;
 			int base = 2;
 			int s_int = 0;
+			space_zero = ' ';
 			MORE_FORMAT:
 				c = *(fmt++); // Skip '%', check parameters
 
