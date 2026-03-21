@@ -1,9 +1,9 @@
 ../TinyUSB/common/tusb_fifo.c:356:17:advance_index	3
 ../TinyUSB/common/tusb_fifo.c:420:13:_tu_fifo_peek	6
 ../TinyUSB/common/tusb_fifo.c:124:13:_ff_pull_const_addr	3
-../TinyUSB/common/tusb_fifo.c:444:17:_tu_fifo_peek_n	12
+../TinyUSB/common/tusb_fifo.c:444:17:_tu_fifo_peek_n	13
 ../TinyUSB/common/tusb_fifo.c:101:13:_ff_push_const_addr	3
-../TinyUSB/common/tusb_fifo.c:469:17:_tu_fifo_write_n.part.0	16
+../TinyUSB/common/tusb_fifo.c:469:17:_tu_fifo_write_n.part.0	17
 ../TinyUSB/common/tusb_fifo.c:70:6:tu_fifo_config	2
 ../TinyUSB/common/tusb_fifo.c:590:10:tu_fifo_count	2
 ../TinyUSB/common/tusb_fifo.c:608:6:tu_fifo_empty	1

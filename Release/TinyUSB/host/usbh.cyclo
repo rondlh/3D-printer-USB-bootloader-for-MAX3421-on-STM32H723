@@ -3,7 +3,7 @@
 ../TinyUSB/host/usbh.c:768:13:_control_xfer_complete	3
 ../TinyUSB/host/usbh.c:935:6:usbh_int_set	2
 ../TinyUSB/host/usbh.c:427:13:clear_device.constprop	1
-../TinyUSB/host/usbh.c:1296:13:process_removed_device	13
+../TinyUSB/host/usbh.c:1296:13:process_removed_device	14
 ../TinyUSB/host/usbh.c:54:19:hcd_deinit	1
 ../TinyUSB/host/usbh.c:58:19:hcd_configure	1
 ../TinyUSB/host/usbh.c:63:19:tuh_enum_descriptor_device_cb	1

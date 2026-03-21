@@ -1,4 +1,3 @@
-../TinyUSB/class/msc/msc_host.c:121:20:cbw_init	1
 ../TinyUSB/class/msc/msc_host.c:486:13:config_read_capacity_complete	4
 ../TinyUSB/class/msc/msc_host.c:93:9:tuh_msc_get_maxlun	1
 ../TinyUSB/class/msc/msc_host.c:98:10:tuh_msc_get_block_count	1

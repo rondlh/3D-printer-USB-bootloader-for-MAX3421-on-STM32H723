@@ -26,4 +26,4 @@
 ../TinyUSB/portable/analog/max3421/hcd_max3421.c:766:6:hcd_edpt_abort_xfer	5
 ../TinyUSB/portable/analog/max3421/hcd_max3421.c:782:6:hcd_setup_send	6
 ../TinyUSB/portable/analog/max3421/hcd_max3421.c:813:6:hcd_edpt_clear_stall	1
-../TinyUSB/portable/analog/max3421/hcd_max3421.c:1022:6:hcd_int_handler	46
+../TinyUSB/portable/analog/max3421/hcd_max3421.c:1022:6:hcd_int_handler	47
