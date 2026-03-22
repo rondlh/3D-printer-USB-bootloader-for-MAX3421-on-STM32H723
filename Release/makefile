@@ -53,37 +53,37 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := H723_MAX3421
+BUILD_ARTIFACT_NAME := H723_MAX3421 FAT_R0.16
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-H723_MAX3421.elf \
+H723_MAX3421\ FAT_R0.16.elf \
 
 MAP_FILES += \
-H723_MAX3421.map \
+H723_MAX3421\ FAT_R0.16.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-H723_MAX3421.list \
+H723_MAX3421\ FAT_R0.16.list \
 
 OBJCOPY_BIN += \
-H723_MAX3421.bin \
+H723_MAX3421\ FAT_R0.16.bin \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: H723_MAX3421.elf secondary-outputs
+main-build: H723_MAX3421\ FAT_R0.16.elf secondary-outputs
 
 # Tool invocations
-H723_MAX3421.elf H723_MAX3421.map: $(OBJS) $(USER_OBJS) D:\git\3D-printer-USB-bootloader-for-MAX3421-on-STM32H723\STM32H723VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "H723_MAX3421.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"D:\git\3D-printer-USB-bootloader-for-MAX3421-on-STM32H723\STM32H723VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H723_MAX3421.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+H723_MAX3421\ FAT_R0.16.elf H723_MAX3421\ FAT_R0.16.map: $(OBJS) $(USER_OBJS) D:\3D\CubeIDE\H723_MAX3421\ FAT_R0.16\STM32H723VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "H723_MAX3421 FAT_R0.16.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"D:\3D\CubeIDE\H723_MAX3421 FAT_R0.16\STM32H723VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H723_MAX3421 FAT_R0.16.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -92,19 +92,19 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-H723_MAX3421.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "H723_MAX3421.list"
+H723_MAX3421\ FAT_R0.16.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "H723_MAX3421 FAT_R0.16.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-H723_MAX3421.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "H723_MAX3421.bin"
+H723_MAX3421\ FAT_R0.16.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "H723_MAX3421 FAT_R0.16.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) H723_MAX3421.bin H723_MAX3421.elf H723_MAX3421.list H723_MAX3421.map default.size.stdout
+	-$(RM) H723_MAX3421\ FAT_R0.16.bin H723_MAX3421\ FAT_R0.16.elf H723_MAX3421\ FAT_R0.16.list H723_MAX3421\ FAT_R0.16.map H723_MAX3421\\ FAT_R0.16.elf default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
